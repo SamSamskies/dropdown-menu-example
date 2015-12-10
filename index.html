@@ -1,0 +1,87 @@
+<!doctype html>
+<!--[if lt IE 8]> <html class="no-js ie7 oldie" lang="en"> <![endif]-->
+<!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
+<!--[if IE 9]>    <html class="no-js ie9 oldie" lang="en"> <![endif]-->
+<!--[if gt IE 9]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Dropdown Menu</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="dropdown_menu.css">
+</head>
+<body>
+
+<div id="dropdown-menu-container">
+  <ul id="dropdown-menu"></ul>
+</div>
+
+<!-- TEMPLATES START -->
+<script id="item-template" type="text/html">
+  <%= title %>
+  <% if (submenu) { %>
+    <ul class="submenu"></ul>
+  <% } %>
+</script>
+<!-- TEMPLATES END -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.2.3/backbone-min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/backbone.marionette/2.4.4/backbone.marionette.min.js"></script>
+<script src="dropdown_menu.js"></script>
+<script>
+$(function () {
+  var ItemView = Backbone.Marionette.CompositeView.extend({
+    tagName: 'li',
+
+    className: 'menu-item',
+
+    template: '#item-template',
+
+    childViewContainer: '.submenu',
+
+    childViewOptions: function(model) {
+      return {
+        model: model,
+        collection: new Backbone.Collection(model.get('submenu'))
+      }
+    },
+
+    events: {
+      'click': function(e) {
+        e.stopPropagation();
+        alert(this.model.get('title'));
+      }
+    }
+  });
+
+  var DropdownMenuView = Backbone.Marionette.CollectionView.extend({
+    el: '#dropdown-menu',
+
+    childView: ItemView,
+
+    childViewOptions: function(model) {
+      return {
+        model: model,
+        collection: new Backbone.Collection(model.get('submenu'))
+      }
+    },
+
+    onRender: function() {
+      // https://api.jqueryui.com/menu/
+      this.$el.menu();
+    }
+  });
+
+  var dropdownMenuView = new DropdownMenuView({
+    collection: new Backbone.Collection(MENU)
+  });
+
+  dropdownMenuView.render();
+});
+</script>
+</body>
+</html>
